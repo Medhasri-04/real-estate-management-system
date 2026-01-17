@@ -3,29 +3,23 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
-# IntelliJ IDEA
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Eclipse/STS
-.project
+# Eclipse / STS
 .classpath
+.project
 .factorypath
 .settings/
-.bin/
+
+# IntelliJ
+.idea/
+*.iml
 
 # VS Code
 .vscode/
 
-# OS files
+# System files
 .DS_Store
 Thumbs.db
 
 # Logs
 logs/
 *.log
-
-# Others
-*.tmp
