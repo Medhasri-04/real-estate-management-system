@@ -1,4 +1,4 @@
-package com.entity;
+package com.realestatemanagement.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,6 +33,30 @@ public class Review extends BaseEntity {
 
 	public Long getId() {
 		return id;
+	}
+    
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public User getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(User customer) {
+		this.customer = customer;
+	}
+
+	public Property getProperty() {
+		return property;
+	}
+
+	public void setProperty(Property property) {
+		this.property = property;
 	}
 
 	public void setId(Long id) {

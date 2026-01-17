@@ -1,4 +1,4 @@
-package com.entity;
+package com.realestatemanagement.entity;
 
 import java.time.LocalDateTime;
 
@@ -56,4 +56,28 @@ public class Booking extends BaseEntity {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public LocalDateTime getVisitDateTime() {
+		return visitDateTime;
+	}
+
+	public void setVisitDateTime(LocalDateTime visitDateTime) {
+		this.visitDateTime = visitDateTime;
+	}
+	public User getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(User customer) {
+        this.customer = customer;
+    }
+
+    public Property getProperty() {
+        return property;
+    }
+
+    public void setProperty(Property property) {
+        this.property = property;
+    }
+
 }

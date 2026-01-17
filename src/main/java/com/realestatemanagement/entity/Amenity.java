@@ -1,4 +1,4 @@
-package com.entity;
+package com.realestatemanagement.entity;
 
 import java.util.Set;
 

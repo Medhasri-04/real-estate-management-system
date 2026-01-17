@@ -1,4 +1,4 @@
-package com.entity;
+package com.realestatemanagement.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,4 +54,29 @@ public class Notification extends BaseEntity {
 	public void setType(String type) {
 		this.type = type;
 	}
+
+	public Boolean getSent() {
+		return sent;
+	}
+
+	public void setSent(Boolean sent) {
+		this.sent = sent;
+	}
+
+	public Boolean getRead() {
+		return read;
+	}
+
+	public void setRead(Boolean read) {
+		this.read = read;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
 }

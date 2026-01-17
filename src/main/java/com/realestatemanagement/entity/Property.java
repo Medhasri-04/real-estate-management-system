@@ -1,4 +1,4 @@
-package com.entity;
+package com.realestatemanagement.entity;
 
 import java.util.List;
 import java.util.Set;
@@ -110,5 +110,69 @@ public class Property extends BaseEntity {
 
 	public void setAvailability(Boolean availability) {
 		this.availability = availability;
+	}
+
+	public String getFurnishingStatus() {
+		return furnishingStatus;
+	}
+
+	public void setFurnishingStatus(String furnishingStatus) {
+		this.furnishingStatus = furnishingStatus;
+	}
+
+	public User getAgent() {
+		return agent;
+	}
+
+	public void setAgent(User agent) {
+		this.agent = agent;
+	}
+
+	public List<Booking> getBookings() {
+		return bookings;
+	}
+
+	public void setBookings(List<Booking> bookings) {
+		this.bookings = bookings;
+	}
+
+	public List<Review> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
+	}
+
+	public Set<Amenity> getAmenities() {
+		return amenities;
+	}
+
+	public void setAmenities(Set<Amenity> amenities) {
+		this.amenities = amenities;
+	}
+
+	public Integer getPropertyAge() {
+		return propertyAge;
+	}
+
+	public void setPropertyAge(Integer propertyAge) {
+		this.propertyAge = propertyAge;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
 	}
 }

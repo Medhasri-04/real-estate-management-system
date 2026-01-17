@@ -1,8 +1,9 @@
-package com.repository;
+package com.realestatemanagement.repository;
 
-import com.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.realestatemanagement.entity.Review;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
