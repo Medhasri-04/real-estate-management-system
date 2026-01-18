@@ -20,8 +20,9 @@ public class Notification extends BaseEntity {
 
 	// EMAIL / SMS
 	private String type;
-
+	@Column(name = "is_sent", nullable = false)
 	private Boolean sent = false;
+	@Column(name = "is_read", nullable = false)
 	private Boolean read = false;
 
 	@ManyToOne
@@ -78,5 +79,5 @@ public class Notification extends BaseEntity {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
 }

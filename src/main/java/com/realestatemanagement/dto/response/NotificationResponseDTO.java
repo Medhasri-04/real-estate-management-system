@@ -9,6 +9,7 @@ public class NotificationResponseDTO {
 	private String message;
 	private String type;
 	private Boolean sent;
+	private Boolean read;
 	private LocalDateTime createdAt;
 
 	public Long getId() {
@@ -57,6 +58,15 @@ public class NotificationResponseDTO {
 
 	public void setSent(Boolean sent) {
 		this.sent = sent;
+	}
+	
+
+	public Boolean getRead() {
+		return read;
+	}
+
+	public void setRead(Boolean read) {
+		this.read = read;
 	}
 
 	public LocalDateTime getCreatedAt() {

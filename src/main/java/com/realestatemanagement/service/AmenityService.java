@@ -1,4 +1,5 @@
 package com.realestatemanagement.service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,47 +14,46 @@ import com.realestatemanagement.repository.AmenityRepository;
 @Service
 public class AmenityService {
 
-    private final AmenityRepository amenityRepository;
+	private final AmenityRepository amenityRepository;
 
-    public AmenityService(AmenityRepository amenityRepository) {
-        this.amenityRepository = amenityRepository;
-    }
+	public AmenityService(AmenityRepository amenityRepository) {
+		this.amenityRepository = amenityRepository;
+	}
 
-    public AmenityResponseDTO createAmenity(AmenityRequestDTO dto) {
-        if (amenityRepository.existsByName(dto.getName())) {
-            throw new RuntimeException("Amenity already exists");
-        }
+	// CREATE
+	public AmenityResponseDTO createAmenity(AmenityRequestDTO dto) {
+		if (amenityRepository.existsByName(dto.getName())) {
+			throw new RuntimeException("Amenity already exists");
+		}
 
-        Amenity amenity = AmenityMapper.toEntity(dto);
-        amenity = amenityRepository.save(amenity);
-        return AmenityMapper.toDto(amenity);
-    }
+		Amenity amenity = AmenityMapper.toEntity(dto);
+		amenity = amenityRepository.save(amenity);
+		return AmenityMapper.toDto(amenity);
+	}
 
-    public List<AmenityResponseDTO> getAllAmenities() {
-        return amenityRepository.findAll()
-                .stream()
-                .map(AmenityMapper::toDto)
-                .collect(Collectors.toList());
-    }
+	// GET ALL
+	public List<AmenityResponseDTO> getAllAmenities() {
+		return amenityRepository.findAll().stream().map(AmenityMapper::toDto).collect(Collectors.toList());
+	}
 
-    public AmenityResponseDTO getAmenityById(Long id) {
-        Amenity amenity = amenityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Amenity not found"));
-        return AmenityMapper.toDto(amenity);
-    }
+	// GET BY ID
+	public AmenityResponseDTO getAmenityById(Long id) {
+		Amenity amenity = amenityRepository.findById(id).orElseThrow(() -> new RuntimeException("Amenity not found"));
+		return AmenityMapper.toDto(amenity);
+	}
 
-    public AmenityResponseDTO updateAmenity(Long id, AmenityRequestDTO dto) {
-        Amenity amenity = amenityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Amenity not found"));
+	// UPDATE
+	public AmenityResponseDTO updateAmenity(Long id, AmenityRequestDTO dto) {
+		Amenity amenity = amenityRepository.findById(id).orElseThrow(() -> new RuntimeException("Amenity not found"));
 
-        amenity.setName(dto.getName());
-        amenity = amenityRepository.save(amenity);
-        return AmenityMapper.toDto(amenity);
-    }
+		amenity.setName(dto.getName());
+		amenity = amenityRepository.save(amenity);
+		return AmenityMapper.toDto(amenity);
+	}
 
-    public void deleteAmenity(Long id) {
-        Amenity amenity = amenityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Amenity not found"));
+	// DELETE
+	public void deleteAmenity(Long id) {
+		Amenity amenity = amenityRepository.findById(id).orElseThrow(() -> new RuntimeException("Amenity not found"));
 		amenityRepository.delete(amenity);
 	}
 }
