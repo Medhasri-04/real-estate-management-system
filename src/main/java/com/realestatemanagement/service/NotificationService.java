@@ -1,68 +1,57 @@
 package com.realestatemanagement.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.realestatemanagement.dto.response.NotificationResponseDTO;
+import com.realestatemanagement.dto.response.MessageResponse;
+import com.realestatemanagement.dto.response.NotificationResponse;
 import com.realestatemanagement.entity.Notification;
-import com.realestatemanagement.entity.User;
+import com.realestatemanagement.mapper.NotificationMapper;
 import com.realestatemanagement.repository.NotificationRepository;
+import com.realestatemanagement.repository.UserRepository;
 
 @Service
 public class NotificationService {
+	private final NotificationRepository notificationRepo;
+	private final UserRepository userRepo;
+	private final NotificationMapper mapper;
 
-	private final NotificationRepository notificationRepository;
-
-	public NotificationService(NotificationRepository notificationRepository) {
-		this.notificationRepository = notificationRepository;
+	public NotificationService(NotificationRepository notificationRepo, UserRepository userRepo,
+			NotificationMapper mapper) {
+		this.notificationRepo = notificationRepo;
+		this.userRepo = userRepo;
+		this.mapper = mapper;
 	}
 
-	// GET all notifications of logged-in user
-	public List<NotificationResponseDTO> getMyNotifications(User user) {
-
-		return notificationRepository.findByUser(user).stream().map(this::mapToDto).collect(Collectors.toList());
+	// helper to get logged-in user id
+	private Long currentUserId() {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return userRepo.findByEmail(email).orElseThrow().getId();
 	}
 
-	// MARK notification as READ
-	public void markAsRead(Long notificationId, User user) {
-
-		Notification notification = notificationRepository.findById(notificationId)
-				.orElseThrow(() -> new RuntimeException("Notification not found"));
-
-		if (!notification.getUser().getId().equals(user.getId())) {
-			throw new RuntimeException("Unauthorized access");
+	// 48. GET /notifications
+	public List<NotificationResponse> list() {
+		List<NotificationResponse> res = new ArrayList<>();
+		for (Notification n : notificationRepo.findByUserId(currentUserId())) {
+			res.add(mapper.toResponse(n));
 		}
-
-		notification.setRead(true);
-		notificationRepository.save(notification);
+		return res;
 	}
 
-	// DELETE notification
-	public void deleteNotification(Long notificationId, User user) {
-
-		Notification notification = notificationRepository.findById(notificationId)
-				.orElseThrow(() -> new RuntimeException("Notification not found"));
-
-		if (!notification.getUser().getId().equals(user.getId())) {
-			throw new RuntimeException("Unauthorized access");
-		}
-
-		notificationRepository.delete(notification);
+	// 49. PATCH /notifications/{id}/read
+	public MessageResponse markRead(Long id) {
+		Notification n = notificationRepo.findById(id).orElseThrow();
+		n.setSent(true);
+		notificationRepo.save(n);
+		return new MessageResponse("Notification marked as read", LocalDateTime.now());
 	}
 
-	// Mapper method
-	private NotificationResponseDTO mapToDto(Notification notification) {
-
-		NotificationResponseDTO dto = new NotificationResponseDTO();
-		dto.setId(notification.getId());
-		dto.setMessage(notification.getMessage());
-		dto.setType(notification.getType());
-		dto.setSent(notification.getSent());
-		dto.setRead(notification.getRead());
-		dto.setCreatedAt(notification.getCreatedAt());
-
-		return dto;
+	// 50. DELETE /notifications/{id}
+	public void delete(Long id) {
+		notificationRepo.deleteById(id);
 	}
 }

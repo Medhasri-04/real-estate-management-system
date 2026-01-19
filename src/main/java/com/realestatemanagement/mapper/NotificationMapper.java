@@ -1,41 +1,20 @@
 package com.realestatemanagement.mapper;
 
-import com.realestatemanagement.dto.request.NotificationRequestDTO;
-import com.realestatemanagement.dto.response.NotificationResponseDTO;
+import org.springframework.stereotype.Component;
+
+import com.realestatemanagement.dto.response.NotificationResponse;
 import com.realestatemanagement.entity.Notification;
-import com.realestatemanagement.entity.User;
 
+@Component
 public class NotificationMapper {
-
-    public static NotificationResponseDTO toDto(Notification notification) {
-        if (notification == null) return null;
-
-        NotificationResponseDTO dto = new NotificationResponseDTO();
-        dto.setId(notification.getId());
-        dto.setMessage(notification.getMessage());
-        dto.setType(notification.getType());
-        dto.setSent(notification.getSent());
-
-        if (notification.getUser() != null) {
-            dto.setUserId(notification.getUser().getId());
-            dto.setUserName(
-                notification.getUser().getFirstName() + " " +
-                notification.getUser().getLastName()
-            );
-        }
-
-        dto.setCreatedAt(notification.getCreatedAt());
-        return dto;
-    }
-
-    public static Notification toEntity(NotificationRequestDTO dto, User user) {
-        if (dto == null) return null;
-
-        Notification notification = new Notification();
-        notification.setMessage(dto.getMessage());
-        notification.setType(dto.getType());
-        notification.setSent(dto.getSent());
-        notification.setUser(user);
-        return notification;
-    }
+	public NotificationResponse toResponse(Notification n) {
+		NotificationResponse r = new NotificationResponse();
+		r.setNotificationId(n.getId());
+		r.setMessage(n.getMessage());
+		r.setType(n.getType());
+		r.setSent(n.isSent());
+		r.setRead(n.isRead());
+		r.setCreatedAt(n.getCreatedAt());
+		return r;
+	}
 }

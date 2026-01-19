@@ -1,40 +1,22 @@
 package com.realestatemanagement.mapper;
 
+import com.realestatemanagement.dto.response.UserProfileResponse;
 import com.realestatemanagement.entity.User;
-import com.realestatemanagement.dto.request.UserRequestDTO;
-import com.realestatemanagement.dto.response.UserResponseDTO;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
-
-	public static UserResponseDTO toDto(User user) {
-		if (user == null)
-			return null;
-
-		UserResponseDTO dto = new UserResponseDTO();
-		dto.setId(user.getId());
-		dto.setFirstName(user.getFirstName());
-		dto.setLastName(user.getLastName());
-		dto.setEmail(user.getEmail());
-		dto.setPhoneNumber(user.getPhoneNumber());
-		dto.setRole(user.getRole()); // String now
-		dto.setEnabled(user.getEnabled());
-		dto.setCreatedAt(user.getCreatedAt());
-		dto.setUpdatedAt(user.getUpdatedAt());
-		return dto;
-	}
-
-	public static User toEntity(UserRequestDTO dto) {
-		if (dto == null)
-			return null;
-
-		User user = new User();
-		user.setFirstName(dto.getFirstName());
-		user.setLastName(dto.getLastName());
-		user.setEmail(dto.getEmail());
-		user.setPhoneNumber(dto.getPhoneNumber());
-		user.setPassword(dto.getPassword());
-		user.setRole(dto.getRole());
-		user.setEnabled(dto.getEnabled());
-		return user;
+	public UserProfileResponse toProfile(User u) {
+		UserProfileResponse r = new UserProfileResponse();
+		r.setUserId(u.getId());
+		r.setFirstName(u.getFirstName());
+		r.setLastName(u.getLastName());
+		r.setEmail(u.getEmail());
+		r.setPhoneNumber(u.getPhoneNumber());
+		r.setRole(u.getRole());
+		r.setEnabled(u.isEnabled());
+		r.setCreatedAt(u.getCreatedAt());
+		r.setUpdatedAt(u.getUpdatedAt());
+		return r;
 	}
 }

@@ -1,14 +1,16 @@
 package com.realestatemanagement.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.realestatemanagement.dto.request.BookingRequestDTO;
-import com.realestatemanagement.dto.request.SiteVisitRequestDTO;
-import com.realestatemanagement.dto.response.BookingResponseDTO;
+import com.realestatemanagement.dto.request.booking.BookingCreateRequest;
+import com.realestatemanagement.dto.request.booking.SiteVisitRequest;
+import com.realestatemanagement.dto.response.BookingResponse;
+import com.realestatemanagement.dto.response.MessageResponse;
 import com.realestatemanagement.entity.Booking;
 import com.realestatemanagement.entity.Property;
 import com.realestatemanagement.entity.User;
@@ -19,97 +21,84 @@ import com.realestatemanagement.repository.UserRepository;
 
 @Service
 public class BookingService {
+	private final BookingRepository bookingRepo;
+	private final PropertyRepository propertyRepo;
+	private final UserRepository userRepo;
+	private final BookingMapper mapper;
 
-    private final BookingRepository bookingRepository;
-    private final UserRepository userRepository;
-    private final PropertyRepository propertyRepository;
+	public BookingService(BookingRepository bookingRepo, PropertyRepository propertyRepo, UserRepository userRepo,
+			BookingMapper mapper) {
+		this.bookingRepo = bookingRepo;
+		this.propertyRepo = propertyRepo;
+		this.userRepo = userRepo;
+		this.mapper = mapper;
+	}
 
-    public BookingService(BookingRepository bookingRepository,
-                          UserRepository userRepository,
-                          PropertyRepository propertyRepository) {
-        this.bookingRepository = bookingRepository;
-        this.userRepository = userRepository;
-        this.propertyRepository = propertyRepository;
-    }
+	private User currentUser() {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return userRepo.findByEmail(email).orElseThrow();
+	}
 
-    // 1. Create Booking
-    public BookingResponseDTO createBooking(BookingRequestDTO dto, Long customerId) {
-        User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-        Property property = propertyRepository.findById(dto.getPropertyId())
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+	// 34) POST /bookings
+	public BookingResponse create(BookingCreateRequest req) {
+		Property property = propertyRepo.findById(req.getPropertyId()).orElseThrow();
+		Booking b = new Booking();
+		b.setProperty(property);
+		b.setCustomer(currentUser());
+		b.setBookingDate(req.getBookingDate());
+		b.setStatus(req.getStatus());
+		bookingRepo.save(b);
+		return mapper.toResponse(b);
+	}
 
-        Booking booking = new Booking();
-        booking.setBookingDate(dto.getBookingDate() != null ? dto.getBookingDate() : LocalDateTime.now());
-        booking.setStatus(dto.getStatus());
-        booking.setCustomer(customer);
-        booking.setProperty(property);
+	// 35) POST /bookings/site-visit
+	public BookingResponse siteVisit(SiteVisitRequest req) {
+		Property property = propertyRepo.findById(req.getPropertyId()).orElseThrow();
+		Booking b = new Booking();
+		b.setProperty(property);
+		b.setCustomer(currentUser());
+		b.setVisitDateTime(req.getVisitDateTime());
+		b.setStatus(req.getStatus());
+		bookingRepo.save(b);
+		return mapper.toResponse(b);
+	}
 
-        booking = bookingRepository.save(booking);
-        return BookingMapper.toDto(booking);
-    }
+	// 36) GET /bookings/{bookingId}
+	public BookingResponse getOne(Long bookingId) {
+		return mapper.toResponse(bookingRepo.findById(bookingId).orElseThrow());
+	}
 
-    // 2. Create Site Visit
-    public BookingResponseDTO createSiteVisit(SiteVisitRequestDTO dto, Long customerId) {
-        User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-        Property property = propertyRepository.findById(dto.getPropertyId())
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+	// 37) GET /bookings/customer
+	public List<BookingResponse> customerBookings() {
+		List<BookingResponse> list = new ArrayList<>();
+		for (Booking b : bookingRepo.findByCustomerId(currentUser().getId())) {
+			list.add(mapper.toResponse(b));
+		}
+		return list;
+	}
 
-        Booking booking = new Booking();
-        booking.setVisitDateTime(dto.getVisitDateTime());
-        booking.setStatus(dto.getStatus());
-        booking.setCustomer(customer);
-        booking.setProperty(property);
+	// 38) GET /bookings/agent
+	public List<BookingResponse> agentBookings() {
+		List<BookingResponse> list = new ArrayList<>();
+		for (Booking b : bookingRepo.findByPropertyAgentId(currentUser().getId())) {
+			list.add(mapper.toResponse(b));
+		}
+		return list;
+	}
 
-        booking = bookingRepository.save(booking);
-        return BookingMapper.toDto(booking);
-    }
+	// 39) PUT /bookings/{bookingId}/confirm
+	public MessageResponse confirm(Long bookingId) {
+		Booking b = bookingRepo.findById(bookingId).orElseThrow();
+		b.setStatus("CONFIRMED");
+		bookingRepo.save(b);
+		return new MessageResponse("Booking confirmed", LocalDateTime.now());
+	}
 
-    // 3. Get Booking by ID
-    public BookingResponseDTO getBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-        return BookingMapper.toDto(booking);
-    }
-
-    // 4. Get bookings by customer
-    public List<BookingResponseDTO> getBookingsByCustomer(Long customerId) {
-        User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        return bookingRepository.findByCustomer(customer)
-                .stream()
-                .map(BookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    // 5. Get bookings by agent (based on properties they manage)
-    public List<BookingResponseDTO> getBookingsByAgent(Long agentId) {
-        User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new RuntimeException("Agent not found"));
-
-        return bookingRepository.findByPropertyAgent(agent)
-                .stream()
-                .map(BookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    // 6. Confirm Booking
-    public BookingResponseDTO confirmBooking(Long bookingId, Long agentId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-        booking.setStatus("CONFIRMED");
-        booking = bookingRepository.save(booking);
-        return BookingMapper.toDto(booking);
-    }
-
-    // 7. Cancel Booking
-    public BookingResponseDTO cancelBooking(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-        booking.setStatus("CANCELLED");
-        booking = bookingRepository.save(booking);
-        return BookingMapper.toDto(booking);
-    }
+	// 40) PUT /bookings/{bookingId}/cancel
+	public MessageResponse cancel(Long bookingId) {
+		Booking b = bookingRepo.findById(bookingId).orElseThrow();
+		b.setStatus("CANCELLED");
+		bookingRepo.save(b);
+		return new MessageResponse("Booking cancelled", LocalDateTime.now());
+	}
 }

@@ -1,13 +1,16 @@
 package com.realestatemanagement.repository;
 
-import java.util.List;
+import com.realestatemanagement.entity.Notification;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.realestatemanagement.entity.Notification;
-import com.realestatemanagement.entity.User;
+import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-	List<Notification> findByUser(User user);
+    // GET /notifications
+
+    List<Notification> findByUserId(Long userId);
+
 }
+ 

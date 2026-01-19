@@ -1,62 +1,32 @@
 package com.realestatemanagement.entity;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	private String firstName;
 	private String lastName;
-
-	@Column(unique = true, nullable = false)
+	@Column(unique = true)
 	private String email;
-
 	private String phoneNumber;
-	private String password;
-
-	// ADMIN / AGENT / CUSTOMER
+	@JsonIgnore
+	private String password; 
+	// "ADMIN", "AGENT", "CUSTOMER"
 	private String role;
-
-	private Boolean enabled = true;
-
-	@OneToMany(mappedBy = "agent")
-	private List<Property> properties;
-
-	@OneToMany(mappedBy = "customer")
-	private List<Booking> bookings;
-
-	@OneToMany(mappedBy = "customer")
-	private List<Review> reviews;
-
-	@OneToMany(mappedBy = "user")
-	private List<Notification> notifications;
+	private boolean enabled = true;
 
 	public User() {
-	}
-
-	public User(Long id, String firstName, String lastName, String email, String phoneNumber, String password,
-			String role, Boolean enabled) {
-		this.id = id;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.phoneNumber = phoneNumber;
-		this.password = password;
-		this.role = role;
-		this.enabled = enabled;
 	}
 
 	public Long getId() {
@@ -115,11 +85,11 @@ public class User extends BaseEntity {
 		this.role = role;
 	}
 
-	public Boolean getEnabled() {
+	public boolean isEnabled() {
 		return enabled;
 	}
 
-	public void setEnabled(Boolean enabled) {
+	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 }

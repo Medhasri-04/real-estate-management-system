@@ -2,29 +2,20 @@ package com.realestatemanagement.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 
 @MappedSuperclass
-public abstract class BaseEntity {
-
-	@Column(updatable = false)
-	protected LocalDateTime createdAt;
-
-	protected LocalDateTime updatedAt;
-
-	@PrePersist
-	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-		updatedAt = createdAt;
-	}
-
-	@PreUpdate
-	protected void onUpdate() {
-		updatedAt = LocalDateTime.now();
-	}
+public class BaseEntity {
+	@CreationTimestamp
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+	@UpdateTimestamp
+	@Column(nullable = false)
+	private LocalDateTime updatedAt;
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;

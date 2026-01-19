@@ -1,27 +1,15 @@
 package com.realestatemanagement.mapper;
 
+import com.realestatemanagement.dto.response.AmenityResponse;
 import com.realestatemanagement.entity.Amenity;
-import com.realestatemanagement.dto.request.AmenityRequestDTO;
-import com.realestatemanagement.dto.response.AmenityResponseDTO;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AmenityMapper {
-
-	public static AmenityResponseDTO toDto(Amenity amenity) {
-		if (amenity == null)
-			return null;
-
-		AmenityResponseDTO dto = new AmenityResponseDTO();
-		dto.setId(amenity.getId());
-		dto.setName(amenity.getName());
-		return dto;
-	}
-
-	public static Amenity toEntity(AmenityRequestDTO dto) {
-		if (dto == null)
-			return null;
-
-		Amenity amenity = new Amenity();
-		amenity.setName(dto.getName());
-		return amenity;
+	public AmenityResponse toResponse(Amenity a) {
+		AmenityResponse r = new AmenityResponse();
+		r.setAmenityId(a.getId());
+		r.setName(a.getName());
+		return r;
 	}
 }

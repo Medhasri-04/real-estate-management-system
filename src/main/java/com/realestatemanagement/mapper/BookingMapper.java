@@ -1,53 +1,23 @@
 package com.realestatemanagement.mapper;
 
-import java.time.LocalDateTime;
+import org.springframework.stereotype.Component;
 
-import com.realestatemanagement.dto.request.BookingRequestDTO;
-import com.realestatemanagement.dto.response.BookingResponseDTO;
+import com.realestatemanagement.dto.response.BookingResponse;
 import com.realestatemanagement.entity.Booking;
-import com.realestatemanagement.entity.Property;
-import com.realestatemanagement.entity.User;
 
+@Component
 public class BookingMapper {
-
-    public static BookingResponseDTO toDto(Booking booking) {
-        if (booking == null) return null;
-
-        BookingResponseDTO dto = new BookingResponseDTO();
-        dto.setId(booking.getId());
-        dto.setBookingDate(booking.getBookingDate());
-        dto.setVisitDateTime(booking.getVisitDateTime());
-        dto.setStatus(booking.getStatus());
-
-        if (booking.getCustomer() != null) {
-            dto.setCustomerId(booking.getCustomer().getId());
-            dto.setCustomerName(
-                booking.getCustomer().getFirstName() + " " +
-                booking.getCustomer().getLastName()
-            );
-        }
-
-        if (booking.getProperty() != null) {
-            dto.setPropertyId(booking.getProperty().getId());
-            dto.setPropertyTitle(booking.getProperty().getTitle());
-        }
-
-        dto.setCreatedAt(booking.getCreatedAt());
-        dto.setUpdatedAt(booking.getUpdatedAt());
-        return dto;
-    }
-
-    public static Booking toEntity(BookingRequestDTO dto, User customer, Property property) {
-        if (dto == null) return null;
-
-        Booking booking = new Booking();
-        booking.setBookingDate(
-            dto.getBookingDate() != null ? dto.getBookingDate() : LocalDateTime.now()
-        );
-        booking.setVisitDateTime(dto.getVisitDateTime());
-        booking.setStatus(dto.getStatus());
-        booking.setCustomer(customer);
-        booking.setProperty(property);
-        return booking;
-    }
+	public BookingResponse toResponse(Booking b) {
+		BookingResponse r = new BookingResponse();
+		r.setBookingId(b.getId());
+		r.setPropertyId(b.getProperty() != null ? b.getProperty().getId() : null);
+		r.setCustomerId(b.getCustomer() != null ? b.getCustomer().getId() : null);
+		r.setStatus(b.getStatus());
+		r.setType(b.getType());
+		r.setBookingDate(b.getBookingDate());
+		r.setVisitDateTime(b.getVisitDateTime());
+		r.setCreatedAt(b.getCreatedAt());
+		r.setUpdatedAt(b.getUpdatedAt());
+		return r;
+	}
 }

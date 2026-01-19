@@ -1,109 +1,83 @@
 package com.realestatemanagement.service;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import java.time.LocalDateTime;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.realestatemanagement.dto.request.LoginRequestDTO;
-import com.realestatemanagement.dto.request.RegisterRequestDTO;
-import com.realestatemanagement.dto.response.JwtResponseDTO;
+import com.realestatemanagement.dto.request.auth.ForgotPasswordRequest;
+import com.realestatemanagement.dto.request.auth.LoginRequest;
+import com.realestatemanagement.dto.request.auth.RegisterRequest;
+import com.realestatemanagement.dto.request.auth.ResetPasswordRequest;
+import com.realestatemanagement.dto.response.AuthResponse;
+import com.realestatemanagement.dto.response.MessageResponse;
+import com.realestatemanagement.dto.response.UserProfileResponse;
 import com.realestatemanagement.entity.User;
+import com.realestatemanagement.mapper.UserMapper;
 import com.realestatemanagement.repository.UserRepository;
 import com.realestatemanagement.security.JwtService;
 
 @Service
 public class AuthService {
-
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
-	private final AuthenticationManager authManager;
+	private final UserMapper userMapper;
 
 	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
-			AuthenticationManager authManager) {
+			UserMapper userMapper) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
-		this.authManager = authManager;
+		this.userMapper = userMapper;
 	}
 
-	// ================= Register a regular user =================
-	public String register(RegisterRequestDTO dto) {
-		if (userRepository.existsByEmail(dto.getEmail())) {
+	public MessageResponse registerAgent(RegisterRequest req) {
+		if (userRepository.existsByEmail(req.getEmail())) {
 			throw new RuntimeException("Email already exists");
 		}
-
-		User user = new User();
-		user.setFirstName(dto.getFirstName());
-		user.setLastName(dto.getLastName());
-		user.setEmail(dto.getEmail());
-		user.setPhoneNumber(dto.getPhoneNumber());
-		user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		user.setRole("CUSTOMER"); // default role for normal registration
-		userRepository.save(user);
-
-		return "User registered successfully";
+		User u = new User();
+		u.setFirstName(req.getFirstName());
+		u.setLastName(req.getLastName());
+		u.setEmail(req.getEmail());
+		u.setPhoneNumber(req.getPhoneNumber());
+		u.setPassword(passwordEncoder.encode(req.getPassword()));
+		u.setRole(req.getRole());
+		u.setEnabled(true);
+		userRepository.save(u);
+		return new MessageResponse("User registered successfully", LocalDateTime.now());
 	}
 
-	// ================= Register an agent (ADMIN only) =================
-	public String registerAgent(RegisterRequestDTO dto) {
-		if (userRepository.existsByEmail(dto.getEmail())) {
-			throw new RuntimeException("Email already exists");
+	public AuthResponse login(LoginRequest req) {
+		User u = userRepository.findByEmail(req.getEmail())
+				.orElseThrow(() -> new RuntimeException("Invalid credentials"));
+		if (!passwordEncoder.matches(req.getPassword(), u.getPassword())) {
+			throw new RuntimeException("Invalid credentials");
 		}
-
-		User user = new User();
-		user.setFirstName(dto.getFirstName());
-		user.setLastName(dto.getLastName());
-		user.setEmail(dto.getEmail());
-		user.setPhoneNumber(dto.getPhoneNumber());
-		user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		user.setRole("AGENT"); // role for agent
-		userRepository.save(user);
-
-		return "Agent registered successfully";
+		String token = jwtService.generateToken(u.getEmail());
+		return new AuthResponse(token, u.getRole());
 	}
 
-	// ================= Login =================
-
-	public JwtResponseDTO login(LoginRequestDTO dto) {
-		var auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
-
-		var principal = (org.springframework.security.core.userdetails.User) auth.getPrincipal();
-		String token = jwtService.generateToken(principal); // ✅ now compiles
-
-		// Optionally fetch role (or any other data) from your entity:
-		User user = userRepository.findByEmail(principal.getUsername())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		return new JwtResponseDTO(token, user.getRole());
+	public MessageResponse logout() {
+		return new MessageResponse("Logged out successfully", LocalDateTime.now());
 	}
 
-	// ================= Send password reset link =================
-	public void sendResetLink(String email) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-
-		// Simulate sending email (replace with actual email service)
-		System.out.println("Sending password reset link to: " + email);
+	public MessageResponse forgotPassword(ForgotPasswordRequest req) {
+		userRepository.findByEmail(req.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+		return new MessageResponse("Password reset link sent", LocalDateTime.now());
 	}
 
-	// ================= Reset password =================
-	public void resetPassword(String email, String newPassword) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-
-		user.setPassword(passwordEncoder.encode(newPassword));
-		userRepository.save(user);
+	public MessageResponse resetPassword(ResetPasswordRequest req) {
+		User u = userRepository.findByEmail(req.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+		u.setPassword(passwordEncoder.encode(req.getNewPassword()));
+		userRepository.save(u);
+		return new MessageResponse("Password reset successful", LocalDateTime.now());
 	}
 
-	// ================= Get profile of currently logged-in user =================
-	public User getProfile() {
-		Object principal = org.springframework.security.core.context.SecurityContextHolder.getContext()
-				.getAuthentication().getPrincipal();
-
-		if (principal instanceof User user) {
-			return userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User not found"));
-		} else {
-			throw new RuntimeException("User not authenticated");
-		}
+	public UserProfileResponse profile() {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		User u = userRepository.findByEmail(email).orElseThrow();
+		return userMapper.toProfile(u);
 	}
 }

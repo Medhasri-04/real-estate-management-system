@@ -1,95 +1,75 @@
 package com.realestatemanagement.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.realestatemanagement.dto.request.LoginRequestDTO;
-import com.realestatemanagement.dto.request.RegisterRequestDTO;
-import com.realestatemanagement.dto.response.JwtResponseDTO;
-import com.realestatemanagement.entity.User;
+import com.realestatemanagement.dto.request.auth.ForgotPasswordRequest;
+import com.realestatemanagement.dto.request.auth.LoginRequest;
+import com.realestatemanagement.dto.request.auth.RegisterRequest;
+import com.realestatemanagement.dto.request.auth.ResetPasswordRequest;
+import com.realestatemanagement.dto.response.AuthResponse;
+import com.realestatemanagement.dto.response.MessageResponse;
+import com.realestatemanagement.dto.response.UserProfileResponse;
 import com.realestatemanagement.service.AuthService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 public class AuthController {
+	private final AuthService authService;
 
-    private final AuthService authService;
+	public AuthController(AuthService authService) {
+		this.authService = authService;
+	}
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+	// 1. POST /auth/register
+	@PostMapping("/register")
+	@ResponseStatus(HttpStatus.CREATED)
+	public MessageResponse register(@Valid @RequestBody RegisterRequest req) {
+		return authService.registerAgent(req);
+	}
 
-    // ================= 1) Register User =================
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequestDTO dto) {
-        String message = authService.register(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ApiResponse(message)
-        );
-    }
+	// 2. POST /auth/login
+	@PostMapping("/login")
+	public AuthResponse login(@Valid @RequestBody LoginRequest req) {
+		return authService.login(req);
+	}
 
-    // ================= 2) Login =================
-    @PostMapping("/login")
-    public ResponseEntity<JwtResponseDTO> login(@RequestBody LoginRequestDTO dto) {
-        JwtResponseDTO response = authService.login(dto);
-        return ResponseEntity.ok(response);
-    }
+	// 3. POST /auth/logout
+	@PostMapping("/logout")
+	public MessageResponse logout() {
+		return authService.logout();
+	}
 
-    // ================= 3) Logout =================
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse> logout() {
-        // JWT is stateless; client just deletes token. We can optionally blacklist tokens.
-        return ResponseEntity.ok(new ApiResponse("Logged out successfully"));
-    }
+	// 4. POST /auth/forgot-password
+	@PostMapping("/forgot-password")
+	public MessageResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+		return authService.forgotPassword(req);
+	}
 
-    // ================= 4) Forgot Password =================
-    @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse> forgotPassword(@RequestParam String email) {
-        authService.sendResetLink(email);
-        return ResponseEntity.ok(new ApiResponse("Password reset link sent to email"));
-    }
+	// 5. PUT /auth/reset-password
+	@PutMapping("/reset-password")
+	public MessageResponse resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+		return authService.resetPassword(req);
+	}
 
-    // ================= 5) Reset Password =================
-    @PutMapping("/reset-password")
-    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String email,
-                                                     @RequestParam String newPassword) {
-        authService.resetPassword(email, newPassword);
-        return ResponseEntity.ok(new ApiResponse("Password reset successful"));
-    }
+	// 6. GET /auth/profile
+	@GetMapping("/profile")
+	public UserProfileResponse profile() {
+		return authService.profile();
+	}
 
-    // ================= 6) Get Profile =================
-    @GetMapping("/profile")
-    public ResponseEntity<User> getProfile() {
-        User user = authService.getProfile();
-        return ResponseEntity.ok(user);
-    }
-
-    // ================= 7) Register Agent (ADMIN only) =================
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/register/agent")
-    public ResponseEntity<?> registerAgent(@RequestBody RegisterRequestDTO dto) {
-        String message = authService.registerAgent(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ApiResponse(message)
-        );
-    }
-
-    // ================= Helper class for simple message response =================
-    static class ApiResponse {
-        private String message;
-
-        public ApiResponse(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-    }
+	// 7. POST /auth/register/agent (ADMIN only)
+	@PostMapping("/register/agent")
+	@ResponseStatus(HttpStatus.CREATED)
+	public MessageResponse registerAgent(@Valid @RequestBody RegisterRequest req) {
+		return authService.registerAgent(req);
+	}
 }

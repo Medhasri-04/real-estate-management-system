@@ -1,7 +1,7 @@
 package com.realestatemanagement.entity;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,46 +12,33 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "properties")
 public class Property extends BaseEntity {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	private String title;
-
 	@Column(length = 2000)
 	private String description;
-
 	private Double price;
 	private String location;
-
-	// RENT / SALE
+	// "RENT" or "SALE"
 	private String propertyType;
-
-	private Boolean availability;
+	private Boolean availability = true;
 	private Integer propertyAge;
+	// "FURNISHED" / "SEMI_FURNISHED" / "UNFURNISHED"
 	private String furnishingStatus;
-
 	private Double latitude;
 	private Double longitude;
-
 	@ManyToOne
 	@JoinColumn(name = "agent_id")
 	private User agent;
-
-	@OneToMany(mappedBy = "property")
-	private List<Booking> bookings;
-
-	@OneToMany(mappedBy = "property")
-	private List<Review> reviews;
-
 	@ManyToMany
 	@JoinTable(name = "property_amenities", joinColumns = @JoinColumn(name = "property_id"), inverseJoinColumns = @JoinColumn(name = "amenity_id"))
-	private Set<Amenity> amenities;
+	private List<Amenity> amenities = new ArrayList<>();
 
 	public Property() {
 	}
@@ -112,52 +99,20 @@ public class Property extends BaseEntity {
 		this.availability = availability;
 	}
 
-	public String getFurnishingStatus() {
-		return furnishingStatus;
-	}
-
-	public void setFurnishingStatus(String furnishingStatus) {
-		this.furnishingStatus = furnishingStatus;
-	}
-
-	public User getAgent() {
-		return agent;
-	}
-
-	public void setAgent(User agent) {
-		this.agent = agent;
-	}
-
-	public List<Booking> getBookings() {
-		return bookings;
-	}
-
-	public void setBookings(List<Booking> bookings) {
-		this.bookings = bookings;
-	}
-
-	public List<Review> getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(List<Review> reviews) {
-		this.reviews = reviews;
-	}
-
-	public Set<Amenity> getAmenities() {
-		return amenities;
-	}
-
-	public void setAmenities(Set<Amenity> amenities) {
-		this.amenities = amenities;
-	}
-
 	public Integer getPropertyAge() {
 		return propertyAge;
 	}
 
 	public void setPropertyAge(Integer propertyAge) {
 		this.propertyAge = propertyAge;
+	}
+
+	public String getFurnishingStatus() {
+		return furnishingStatus;
+	}
+
+	public void setFurnishingStatus(String furnishingStatus) {
+		this.furnishingStatus = furnishingStatus;
 	}
 
 	public Double getLatitude() {
@@ -174,5 +129,21 @@ public class Property extends BaseEntity {
 
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
+	}
+
+	public User getAgent() {
+		return agent;
+	}
+
+	public void setAgent(User agent) {
+		this.agent = agent;
+	}
+
+	public List<Amenity> getAmenities() {
+		return amenities;
+	}
+
+	public void setAmenities(List<Amenity> amenities) {
+		this.amenities = amenities;
 	}
 }

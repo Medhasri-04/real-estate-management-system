@@ -7,23 +7,23 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "notifications")
 public class Notification extends BaseEntity {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	@Column(length = 1000)
 	private String message;
-
-	// EMAIL / SMS
+	// "EMAIL" or "SMS"
 	private String type;
-	@Column(name = "is_sent", nullable = false)
-	private Boolean sent = false;
-	@Column(name = "is_read", nullable = false)
-	private Boolean read = false;
+	@Column(name = "is_sent")
+	private boolean sent = false;
+
+	@Column(name = "is_read")
+	private boolean read = false;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
@@ -56,19 +56,19 @@ public class Notification extends BaseEntity {
 		this.type = type;
 	}
 
-	public Boolean getSent() {
+	public boolean isSent() {
 		return sent;
 	}
 
-	public void setSent(Boolean sent) {
+	public void setSent(boolean sent) {
 		this.sent = sent;
 	}
 
-	public Boolean getRead() {
+	public boolean isRead() {
 		return read;
 	}
 
-	public void setRead(Boolean read) {
+	public void setRead(boolean read) {
 		this.read = read;
 	}
 
@@ -79,5 +79,4 @@ public class Notification extends BaseEntity {
 	public void setUser(User user) {
 		this.user = user;
 	}
-
 }

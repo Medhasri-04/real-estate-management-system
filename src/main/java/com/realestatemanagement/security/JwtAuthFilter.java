@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.realestatemanagement.entity.User;
 import com.realestatemanagement.repository.UserRepository;
 
 import jakarta.servlet.FilterChain;
@@ -18,7 +20,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
-
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 
@@ -28,31 +29,36 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected boolean shouldNotFilter(HttpServletRequest request) {
-		return request.getServletPath().startsWith("/api/v1/auth/");
-	}
-
-	@Override
-	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-
-		String header = req.getHeader("Authorization");
-
-		if (header != null && header.startsWith("Bearer ")) {
-
-			String token = header.substring(7);
-
-			if (jwtService.validateToken(token)) {
-				String email = jwtService.getEmailFromToken(token);
-
-				userRepository.findByEmail(email).ifPresent(user -> {
-					var auth = new UsernamePasswordAuthenticationToken(user, null,
-							List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())));
-					SecurityContextHolder.getContext().setAuthentication(auth);
-				});
-			}
+		String authHeader = request.getHeader("Authorization");
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			filterChain.doFilter(request, response);
+			return;
 		}
-
-		chain.doFilter(req, res);
+		String token = authHeader.substring(7);
+		if (!jwtService.isValid(token)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+		String email = jwtService.extractEmail(token);
+		// If already authenticated, continue
+		if (SecurityContextHolder.getContext().getAuthentication() != null) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+		User user = userRepository.findByEmail(email).orElse(null);
+		if (user == null || !user.isEnabled()) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+		// Spring Security expects roles like: ROLE_ADMIN / ROLE_AGENT / ROLE_CUSTOMER
+		String role = user.getRole() == null ? "CUSTOMER" : user.getRole();
+		List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null,
+				authorities);
+		authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		filterChain.doFilter(request, response);
 	}
 }
