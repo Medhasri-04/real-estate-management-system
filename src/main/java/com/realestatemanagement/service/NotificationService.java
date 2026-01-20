@@ -27,13 +27,12 @@ public class NotificationService {
 		this.mapper = mapper;
 	}
 
-	// helper to get logged-in user id
 	private Long currentUserId() {
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepo.findByEmail(email).orElseThrow().getId();
 	}
 
-	// 48. GET /notifications
+	// GET 
 	public List<NotificationResponse> list() {
 		List<NotificationResponse> res = new ArrayList<>();
 		for (Notification n : notificationRepo.findByUserId(currentUserId())) {
@@ -42,7 +41,7 @@ public class NotificationService {
 		return res;
 	}
 
-	// 49. PATCH /notifications/{id}/read
+	// PATCH 
 	public MessageResponse markRead(Long id) {
 		Notification n = notificationRepo.findById(id).orElseThrow();
 		n.setSent(true);
@@ -50,7 +49,7 @@ public class NotificationService {
 		return new MessageResponse("Notification marked as read", LocalDateTime.now());
 	}
 
-	// 50. DELETE /notifications/{id}
+	//DELETE 
 	public void delete(Long id) {
 		notificationRepo.deleteById(id);
 	}

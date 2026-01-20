@@ -23,7 +23,7 @@ public class AmenityService {
 		this.amenityMapper = amenityMapper;
 	}
 
-	// POST /amenities (ADMIN)
+	// POST
 	public AmenityResponse create(AmenityRequest req) {
 		if (amenityRepository.existsByName(req.getName())) {
 			throw new RuntimeException("Amenity already exists");
@@ -34,7 +34,7 @@ public class AmenityService {
 		return amenityMapper.toResponse(a);
 	}
 
-	// GET /amenities
+	// GET
 	public List<AmenityResponse> getAll() {
 		List<AmenityResponse> res = new ArrayList<>();
 		for (Amenity a : amenityRepository.findAll()) {
@@ -43,16 +43,16 @@ public class AmenityService {
 		return res;
 	}
 
-	// GET /amenities/{amenityId}
+	// GET
 	public AmenityResponse getOne(Long amenityId) {
 		Amenity a = amenityRepository.findById(amenityId).orElseThrow(() -> new RuntimeException("Amenity not found"));
 		return amenityMapper.toResponse(a);
 	}
 
-	// PUT /amenities/{amenityId}
+	// PUT
 	public MessageResponse update(Long amenityId, AmenityRequest req) {
 		Amenity a = amenityRepository.findById(amenityId).orElseThrow(() -> new RuntimeException("Amenity not found"));
-		// if renaming, prevent duplicates
+
 		if (!a.getName().equalsIgnoreCase(req.getName()) && amenityRepository.existsByName(req.getName())) {
 			throw new RuntimeException("Amenity name already exists");
 		}
@@ -61,7 +61,7 @@ public class AmenityService {
 		return new MessageResponse("Amenity updated", LocalDateTime.now());
 	}
 
-	// DELETE /amenities/{amenityId}
+	// DELETE
 	public void delete(Long amenityId) {
 		if (!amenityRepository.existsById(amenityId)) {
 			throw new RuntimeException("Amenity not found");

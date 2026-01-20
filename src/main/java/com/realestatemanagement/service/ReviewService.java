@@ -41,7 +41,7 @@ public class ReviewService {
 		return userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 	}
 
-	// 41) POST /properties/{propertyId}/reviews
+	// POST 
 	public MessageResponse add(Long propertyId, ReviewCreateRequest req) {
 		Review r = new Review();
 		r.setRating(req.getRating());
@@ -52,7 +52,7 @@ public class ReviewService {
 		return new MessageResponse("Review submitted", LocalDateTime.now());
 	}
 
-	// 42) GET /properties/{propertyId}/reviews
+	//  GET 
 	public List<ReviewResponse> list(Long propertyId) {
 		List<ReviewResponse> res = new ArrayList<>();
 		for (Review r : reviewRepo.findByPropertyId(propertyId)) {
@@ -61,7 +61,7 @@ public class ReviewService {
 		return res;
 	}
 
-	// 43) GET /properties/{propertyId}/reviews/summary
+	// GET 
 	public ReviewSummaryResponse summary(Long propertyId) {
 		List<Review> reviews = reviewRepo.findByPropertyId(propertyId);
 		double sum = 0;
@@ -84,7 +84,7 @@ public class ReviewService {
 		return resp;
 	}
 
-	// 44) PATCH /reviews/{reviewId}
+	//  PATCH 
 	public MessageResponse update(Long reviewId, ReviewUpdateRequest req) {
 		Review r = reviewRepo.findById(reviewId).orElseThrow(() -> new RuntimeException("Review not found"));
 		r.setRating(req.getRating());
@@ -93,7 +93,7 @@ public class ReviewService {
 		return new MessageResponse("Review updated", LocalDateTime.now());
 	}
 
-	// 44) DELETE /reviews/{reviewId}
+	// DELETE 
 	public void delete(Long reviewId) {
 		if (!reviewRepo.existsById(reviewId)) {
 			throw new RuntimeException("Review not found");

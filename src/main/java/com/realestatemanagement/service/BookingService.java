@@ -39,7 +39,7 @@ public class BookingService {
 		return userRepo.findByEmail(email).orElseThrow();
 	}
 
-	// 34) POST /bookings
+	//  POST 
 	public BookingResponse create(BookingCreateRequest req) {
 		Property property = propertyRepo.findById(req.getPropertyId()).orElseThrow();
 		Booking b = new Booking();
@@ -51,7 +51,7 @@ public class BookingService {
 		return mapper.toResponse(b);
 	}
 
-	// 35) POST /bookings/site-visit
+	//POST 
 	public BookingResponse siteVisit(SiteVisitRequest req) {
 		Property property = propertyRepo.findById(req.getPropertyId()).orElseThrow();
 		Booking b = new Booking();
@@ -63,12 +63,12 @@ public class BookingService {
 		return mapper.toResponse(b);
 	}
 
-	// 36) GET /bookings/{bookingId}
+	//  GET 
 	public BookingResponse getOne(Long bookingId) {
 		return mapper.toResponse(bookingRepo.findById(bookingId).orElseThrow());
 	}
 
-	// 37) GET /bookings/customer
+	//  GET 
 	public List<BookingResponse> customerBookings() {
 		List<BookingResponse> list = new ArrayList<>();
 		for (Booking b : bookingRepo.findByCustomerId(currentUser().getId())) {
@@ -77,7 +77,7 @@ public class BookingService {
 		return list;
 	}
 
-	// 38) GET /bookings/agent
+	// GET 
 	public List<BookingResponse> agentBookings() {
 		List<BookingResponse> list = new ArrayList<>();
 		for (Booking b : bookingRepo.findByPropertyAgentId(currentUser().getId())) {
@@ -86,7 +86,7 @@ public class BookingService {
 		return list;
 	}
 
-	// 39) PUT /bookings/{bookingId}/confirm
+	// PUT 
 	public MessageResponse confirm(Long bookingId) {
 		Booking b = bookingRepo.findById(bookingId).orElseThrow();
 		b.setStatus("CONFIRMED");
@@ -94,7 +94,7 @@ public class BookingService {
 		return new MessageResponse("Booking confirmed", LocalDateTime.now());
 	}
 
-	// 40) PUT /bookings/{bookingId}/cancel
+	// PUT
 	public MessageResponse cancel(Long bookingId) {
 		Booking b = bookingRepo.findById(bookingId).orElseThrow();
 		b.setStatus("CANCELLED");

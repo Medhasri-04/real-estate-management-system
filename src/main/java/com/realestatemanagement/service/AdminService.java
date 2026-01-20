@@ -24,7 +24,7 @@ public class AdminService {
 		this.userMapper = userMapper;
 	}
 
-	// GET /admin/users
+	// GET 
 	public List<UserProfileResponse> getAllUsers() {
 		List<UserProfileResponse> res = new ArrayList<>();
 		for (User u : userRepository.findAll()) {
@@ -33,13 +33,13 @@ public class AdminService {
 		return res;
 	}
 
-	// GET /admin/users/{userId}
+	// GET 
 	public UserProfileResponse getUser(Long userId) {
 		User u = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 		return userMapper.toProfile(u);
 	}
 
-	// PUT /admin/users/{userId}/role
+	// PUT 
 	public MessageResponse updateRole(Long userId, UpdateRoleRequest req) {
 		User u = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 		u.setRole(req.getRole());
@@ -47,7 +47,7 @@ public class AdminService {
 		return new MessageResponse("Role updated", LocalDateTime.now());
 	}
 
-	// PUT /admin/users/{userId}/status
+	// PUT 
 	public MessageResponse updateStatus(Long userId, UpdateStatusRequest req) {
 		User u = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 		u.setEnabled("ACTIVE".equalsIgnoreCase(req.getStatus()));

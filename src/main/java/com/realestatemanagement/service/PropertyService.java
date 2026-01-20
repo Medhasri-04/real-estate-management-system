@@ -37,14 +37,13 @@ public class PropertyService {
 		this.mapper = mapper;
 	}
 
-	// Helper: current logged-in user (email is stored in JWT subject)
 	private User currentUser() {
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String email = principal.toString();
 		return userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 	}
 
-	// 21) POST /properties (AGENT)
+	//POST
 	public PropertyResponse create(PropertyCreateRequest req) {
 		User agent = currentUser();
 		Property p = new Property();
@@ -63,7 +62,7 @@ public class PropertyService {
 		return mapper.toResponse(p);
 	}
 
-	// 22) GET /properties
+	// GET
 	public List<PropertyResponse> getAll() {
 		List<PropertyResponse> out = new ArrayList<>();
 		for (Property p : propertyRepo.findAll()) {
@@ -72,13 +71,13 @@ public class PropertyService {
 		return out;
 	}
 
-	// 23) GET /properties/{propertyId}
+	// GET 
 	public PropertyResponse getById(Long propertyId) {
 		Property p = propertyRepo.findById(propertyId).orElseThrow(() -> new RuntimeException("Property not found"));
 		return mapper.toResponse(p);
 	}
 
-	// 24) GET /properties/nearby?lat=&lng=&radiusKm=
+	// GET 
 	public List<PropertyNearbyResponse> nearby(double lat, double lng, double radiusKm) {
 		List<PropertyNearbyResponse> out = new ArrayList<>();
 		for (Property p : propertyRepo.findAll()) {
@@ -96,10 +95,9 @@ public class PropertyService {
 		return out;
 	}
 
-	// 25) PUT /properties/{propertyId}
+	//  PUT 
 	public MessageResponse update(Long propertyId, PropertyUpdateRequest req) {
 		Property p = propertyRepo.findById(propertyId).orElseThrow(() -> new RuntimeException("Property not found"));
-		// update only fields you allow in your API
 		if (req.getPrice() != null)
 			p.setPrice(req.getPrice());
 		if (req.getAvailability() != null)
@@ -110,7 +108,7 @@ public class PropertyService {
 		return new MessageResponse("Property updated", LocalDateTime.now());
 	}
 
-	// 26) DELETE /properties/{propertyId}
+	// DELETE 
 	public void delete(Long propertyId) {
 		if (!propertyRepo.existsById(propertyId)) {
 			throw new RuntimeException("Property not found");
@@ -118,7 +116,7 @@ public class PropertyService {
 		propertyRepo.deleteById(propertyId);
 	}
 
-	// 27) POST /properties/{propertyId}/assign-agent (ADMIN)
+	// POST 
 	public MessageResponse assignAgent(Long propertyId, AssignAgentRequest req) {
 		Property p = propertyRepo.findById(propertyId).orElseThrow(() -> new RuntimeException("Property not found"));
 		User agent = userRepo.findById(req.getAgentId()).orElseThrow(() -> new RuntimeException("Agent not found"));
@@ -127,7 +125,7 @@ public class PropertyService {
 		return new MessageResponse("Agent assigned", LocalDateTime.now());
 	}
 
-	// 28) GET /properties/{propertyId}/amenities
+	// GET
 	public List<String> getAmenities(Long propertyId) {
 		Property p = propertyRepo.findById(propertyId).orElseThrow(() -> new RuntimeException("Property not found"));
 		List<String> names = new ArrayList<>();
@@ -139,7 +137,7 @@ public class PropertyService {
 		return names;
 	}
 
-	// 29) POST /properties/{propertyId}/amenities
+	//  POST 
 	public MessageResponse addAmenities(Long propertyId, LinkAmenitiesRequest req) {
 		Property p = propertyRepo.findById(propertyId).orElseThrow(() -> new RuntimeException("Property not found"));
 		if (req.getAmenityIds() == null || req.getAmenityIds().isEmpty()) {
@@ -166,7 +164,7 @@ public class PropertyService {
 		return new MessageResponse("Amenities linked to property", LocalDateTime.now());
 	}
 
-	// 30) DELETE /properties/{propertyId}/amenities/{amenityId}
+	//  DELETE 
 	public void removeAmenity(Long propertyId, Long amenityId) {
 		Property p = propertyRepo.findById(propertyId).orElseThrow(() -> new RuntimeException("Property not found"));
 		if (p.getAmenities() == null)
@@ -174,8 +172,6 @@ public class PropertyService {
 		p.getAmenities().removeIf(a -> a.getId().equals(amenityId));
 		propertyRepo.save(p);
 	}
-
-	// Basic distance function (Haversine)
 	private double haversineKm(double lat1, double lon1, double lat2, double lon2) {
 		double R = 6371.0;
 		double dLat = Math.toRadians(lat2 - lat1);
