@@ -46,7 +46,6 @@ class AuthServiceTest {
 
 	@Test
 	void login_success_returnsTokenAndRole() {
-		// arrange
 		LoginRequest req = new LoginRequest();
 		req.setEmail("user@example.com");
 		req.setPassword("pass123");
@@ -57,9 +56,7 @@ class AuthServiceTest {
 		when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(u));
 		when(passwordEncoder.matches("pass123", "$bcryptHash")).thenReturn(true);
 		when(jwtService.generateToken("user@example.com")).thenReturn("TOKEN123");
-		// act
 		AuthResponse res = authService.login(req);
-		// assert
 		assertEquals("TOKEN123", res.getToken());
 		assertEquals("CUSTOMER", res.getRole());
 		verify(jwtService).generateToken("user@example.com");
@@ -67,7 +64,6 @@ class AuthServiceTest {
 
 	@Test
 	void login_wrongPassword_throwsRuntimeException() {
-		// arrange
 		LoginRequest req = new LoginRequest();
 		req.setEmail("user@example.com");
 		req.setPassword("wrong");
@@ -76,7 +72,6 @@ class AuthServiceTest {
 		u.setPassword("$bcryptHash");
 		when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(u));
 		when(passwordEncoder.matches("wrong", "$bcryptHash")).thenReturn(false);
-		// act + assert
 		RuntimeException ex = assertThrows(RuntimeException.class, () -> authService.login(req));
 		assertEquals("Invalid credentials", ex.getMessage());
 		verify(jwtService, never()).generateToken(anyString());
@@ -84,9 +79,7 @@ class AuthServiceTest {
 
 	@Test
 	void logout_returnsMessageAndTimestamp() {
-		// act
 		MessageResponse res = authService.logout();
-		// assert
 		assertEquals("Logged out successfully", res.getMessage());
 		assertNotNull(res.getTimestamp());
 		assertTrue(res.getTimestamp().isBefore(LocalDateTime.now().plusSeconds(1)));

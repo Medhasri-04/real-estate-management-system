@@ -46,7 +46,6 @@ class ReviewServiceTest {
 
 	@Test
 	void addReview_success_savesReview_returnsMessage() {
-		// arrange
 		Long propertyId = 1L;
 		ReviewCreateRequest req = new ReviewCreateRequest();
 		req.setRating(5);
@@ -59,16 +58,13 @@ class ReviewServiceTest {
 		when(propertyRepo.findById(1L)).thenReturn(Optional.of(p));
 		when(userRepo.findByEmail("cust@example.com")).thenReturn(Optional.of(cust));
 		when(reviewRepo.save(any(Review.class))).thenAnswer(inv -> inv.getArgument(0));
-		// act
 		MessageResponse res = reviewService.add(propertyId, req);
-		// assert
 		assertEquals("Review submitted", res.getMessage());
 		verify(reviewRepo).save(any(Review.class));
 	}
 
 	@Test
 	void summary_calculatesTotalAverageAndBreakdown() {
-		// arrange
 		Long propertyId = 1L;
 		Review r1 = new Review();
 		r1.setRating(5);
@@ -77,9 +73,7 @@ class ReviewServiceTest {
 		Review r3 = new Review();
 		r3.setRating(5);
 		when(reviewRepo.findByPropertyId(propertyId)).thenReturn(List.of(r1, r2, r3));
-		// act
 		ReviewSummaryResponse resp = reviewService.summary(propertyId);
-		// assert
 		assertEquals(propertyId, resp.getPropertyId());
 		assertEquals(3, resp.getTotalReviews());
 		assertEquals((5 + 4 + 5) / 3.0, resp.getAverageRating());

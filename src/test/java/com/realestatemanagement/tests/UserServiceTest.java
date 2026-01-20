@@ -34,14 +34,12 @@ class UserServiceTest {
 	void setup() {
 		MockitoAnnotations.openMocks(this);
 		userService = new UserService(userRepository, passwordEncoder, userMapper);
-		// simulate logged-in user
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken("user@example.com", null));
 	}
 
 	@Test
 	void updatePassword_success() {
-		// arrange
 		UpdatePasswordRequest req = new UpdatePasswordRequest();
 		req.setOldPassword("Old@123");
 		req.setNewPassword("New@456");
@@ -51,9 +49,7 @@ class UserServiceTest {
 		when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
 		when(passwordEncoder.matches("Old@123", "oldHash")).thenReturn(true);
 		when(passwordEncoder.encode("New@456")).thenReturn("newHash");
-		// act
 		MessageResponse response = userService.updatePassword(req);
-		// assert
 		assertEquals("Password updated", response.getMessage());
 		verify(userRepository).save(user);
 		assertEquals("newHash", user.getPassword());
