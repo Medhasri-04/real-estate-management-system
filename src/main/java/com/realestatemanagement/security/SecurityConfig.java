@@ -23,39 +23,29 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).sessionManagement(sm -> sm.sessionCreationPolicy(
 				SessionCreationPolicy.STATELESS)).authorizeHttpRequests(auth -> auth
-						// ✅ public
 						.requestMatchers("/health").permitAll()
-						// ✅ auth public
 						.requestMatchers("/auth/register", "/auth/login", "/auth/forgot-password",
 								"/auth/reset-password")
 						.permitAll()
-						// ✅ logout (JWT: just return message; client deletes token)
 						.requestMatchers("/auth/logout").authenticated()
-						// ✅ auth protected
 						.requestMatchers("/auth/profile").authenticated().requestMatchers("/auth/register/agent")
 						.hasRole("ADMIN")
-						// ✅ user profile management (customer/agent/admin - whoever is logged in)
 						.requestMatchers( "/users/update-phone").authenticated()
 						.requestMatchers( "/users/update-email").authenticated()
 						.requestMatchers( "/users/update-password").authenticated()
 						.requestMatchers( "/users/**").authenticated()
-						// ✅ admin endpoints
 						.requestMatchers("/admin/**").authenticated()
-						// ✅ amenity management (ADMIN)
 						.requestMatchers( "/amenities").hasRole("ADMIN")
 						.requestMatchers("/amenities/**").hasRole("ADMIN")
 						.requestMatchers( "/amenities/**").hasRole("ADMIN")
 						.requestMatchers( "/amenities/**").permitAll()
-						// ✅ property management
 						.requestMatchers( "/properties/*/assign-agent").hasRole("ADMIN")
 						.requestMatchers( "/properties/**").hasRole("AGENT")
 						.requestMatchers( "/properties/**").hasRole("AGENT")
 						.requestMatchers( "/properties/**").permitAll()
-						// ✅ availability (AGENT to block/unblock; view is public)
 						.requestMatchers( "/properties/*/availability").permitAll()
 						.requestMatchers( "/properties/*/availability/block").hasRole("AGENT")
 						.requestMatchers( "/properties/*/availability/block/**").hasRole("AGENT")
-						// ✅ bookings
 						.requestMatchers( "/bookings").hasRole("CUSTOMER")
 						.requestMatchers( "/bookings/site-visit").hasRole("CUSTOMER")
 						.requestMatchers( "/bookings/customer").hasRole("CUSTOMER")
@@ -63,20 +53,16 @@ public class SecurityConfig {
 						.requestMatchers("/bookings/**").authenticated()
 						.requestMatchers( "/bookings/*/confirm").hasAnyRole("AGENT", "ADMIN")
 						.requestMatchers( "/bookings/*/cancel").authenticated()
-						// ✅ reviews
 						.requestMatchers( "/properties/*/reviews").hasRole("CUSTOMER")
 						.requestMatchers( "/properties/*/reviews/**").permitAll()
 						.requestMatchers( "/reviews/**").hasRole("CUSTOMER")
 						.requestMatchers( "/reviews/**").hasRole("CUSTOMER")
-						// ✅ favorites
 						.requestMatchers( "/properties/*/favorite").hasRole("CUSTOMER")
 						.requestMatchers( "/properties/*/favorite").hasRole("CUSTOMER")
 						.requestMatchers( "/me/favorites").hasRole("CUSTOMER")
-						// ✅ notifications
 						.requestMatchers ("/notifications").authenticated()
 						.requestMatchers( "/notifications/*/read").authenticated()
 						.requestMatchers( "/notifications/**").authenticated()
-						// ✅ everything else requires login
 						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();

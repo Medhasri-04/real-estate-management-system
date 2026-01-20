@@ -42,7 +42,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			return;
 		}
 		String email = jwtService.extractEmail(token);
-		// If already authenticated, continue
 		if (SecurityContextHolder.getContext().getAuthentication() != null) {
 			filterChain.doFilter(request, response);
 			return;
@@ -51,8 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		if (user == null || !user.isEnabled()) {
 			filterChain.doFilter(request, response);
 			return;
-		}
-		// Spring Security expects roles like: ROLE_ADMIN / ROLE_AGENT / ROLE_CUSTOMER
+		} 
 		String role = user.getRole() == null ? "CUSTOMER" : user.getRole();
 		List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null,
