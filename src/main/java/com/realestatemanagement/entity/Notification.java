@@ -17,7 +17,6 @@ public class Notification extends BaseEntity {
 	private Long id;
 	@Column(length = 1000)
 	private String message;
-	// "EMAIL" or "SMS"
 	private String type;
 	@Column(name = "is_sent")
 	private boolean sent = false;

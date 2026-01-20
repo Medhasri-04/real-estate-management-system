@@ -21,7 +21,6 @@ public class Booking extends BaseEntity {
 	private OffsetDateTime visitDateTime;
 	// "PENDING", "CONFIRMED", "CANCELLED"
 	private String status = "PENDING";
-	// optional: "SITE_VISIT" or "RENTAL"
 	private String type;
 	@ManyToOne
 	@JoinColumn(name = "customer_id")
